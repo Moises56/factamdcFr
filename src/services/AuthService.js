@@ -1,4 +1,4 @@
-const API = "http://192.168.0.19:3000/auth";
+const API = "http://172.21.2.100:3001/auth";
 /**
  * Create a new task
  */
@@ -40,6 +40,28 @@ export const loginUser = async (user) => {
 // obtener usuario por by token  req.headers["x-access-token"]
 export const getUserByToken = async (token) => {
   const res = await fetch(API + "/user", {
+    method: "GET",
+    headers: {
+      "x-access-token": token,
+    },
+  });
+  return await res.json();
+};
+
+// obtener todos los usuarios
+export const getAllUsers = async (token) => {
+  const res = await fetch(API + "/users", {
+    method: "GET",
+    headers: {
+      "x-access-token": token,
+    },
+  });
+  return await res.json();
+};
+
+// signOut user
+export const signOut = async (token) => {
+  const res = await fetch(API + "/logout", {
     method: "GET",
     headers: {
       "x-access-token": token,

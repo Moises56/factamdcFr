@@ -2,7 +2,7 @@ import { useEffect } from "react";
 import { StyleSheet, Text, View, Button } from "react-native";
 
 function ProfileScreen(props) {
-  console.log(props);
+  // console.log(props);
   useEffect(() => {
     console.log("Hii");
   }, []);

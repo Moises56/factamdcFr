@@ -13,7 +13,7 @@ const LocalScreens = () => {
       <Text>LocalScreens!</Text>
       <Button
         title="Ir a detalle"
-        onPress={() => navigate("MarketDetailScreen")}
+        // onPress={() => navigate("MarketDetailScreen")}
       />
     </View>
   );

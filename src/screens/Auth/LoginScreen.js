@@ -32,11 +32,18 @@ function LoginScreen({ props }) {
 
     loginUser(data)
       .then((res) => {
-        console.log(res.data);
+        // console.log("Login: ", res.rol);
         if (res.status === "ok") {
           Alert.alert(res.message);
           AsyncStorage.setItem("token", res.data);
-          navigation.navigate("Home");
+          AsyncStorage.setItem("isLoggedIn", JSON.stringify(true));
+          // navigation.navigate("Home");
+          AsyncStorage.setItem("userType", res.rol);
+          if (res.rol === "admin") {
+            navigation.navigate("Home");
+          } else {
+            navigation.navigate("Market");
+          }
         }
       })
       .catch((error) => {
@@ -114,9 +121,7 @@ function LoginScreen({ props }) {
           <View style={{ padding: 15 }}>
             <Text
               style={{ fontSize: 14, fontWeight: "bold", color: "#919191" }}
-            >
-              ----O Continúe como----
-            </Text>
+            ></Text>
           </View>
 
           <View style={styles.bottomButton}>

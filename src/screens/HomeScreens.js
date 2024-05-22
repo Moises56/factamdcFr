@@ -10,11 +10,15 @@ import {
   Alert,
 } from "react-native";
 import React from "react";
+import * as font from "expo-font";
 import { Avatar } from "react-native-paper";
 import Icon from "react-native-vector-icons/FontAwesome5";
 import Check from "react-native-vector-icons/Feather";
 import Back from "react-native-vector-icons/Ionicons";
 import Gender from "react-native-vector-icons/Foundation";
+import Feather from "react-native-vector-icons/Feather";
+import FontAwesome from "react-native-vector-icons/FontAwesome";
+
 import Mobile from "react-native-vector-icons/Entypo";
 import Error from "react-native-vector-icons/MaterialIcons";
 import Email from "react-native-vector-icons/MaterialCommunityIcons";
@@ -27,19 +31,35 @@ import Toast from "react-native-toast-message";
 import { getUserByToken } from "../../src/services/AuthService";
 
 function HomeScreen(props) {
+  const [fontsLoaded, setFontsLoaded] = useState(false);
   const navigation = useNavigation();
-  console.log(props);
+  // console.log(props);
   const [userData, setUserData] = useState("");
+  // nombre
+  const [nombre, setNombre] = useState("");
+  // apellido
+  const [apellido, setApellido] = useState("");
+  // correo
+  const [correo, setCorreo] = useState("");
+  // dni
+  const [dni, setDni] = useState("");
+  // telefono
+  const [telefono, setTelefono] = useState("");
+  //numero_empleado
+  const [numero_empleado, setNumero_empleado] = useState("");
 
   async function getData() {
     const token = await AsyncStorage.getItem("token");
-    console.log(token);
     getUserByToken(token)
       .then((res) => {
-        console.log(res);
-        console.log("res.data: ", res[0].apellido);
         if (res.status === "ok") {
-          setUserData(res[0]);
+          // setUserData(res.data[0]);
+          setNombre(res.data[0].nombre);
+          setApellido(res.data[0].apellido);
+          setCorreo(res.data[0].correo);
+          setDni(res.data[0].dni);
+          setTelefono(res.data[0].telefono);
+          setNumero_empleado(res.data[0].numero_empleado);
         } else {
           Toast.show({
             type: "error",
@@ -84,7 +104,18 @@ function HomeScreen(props) {
     }, [])
   );
 
-  useEffect(() => {}, []);
+  useEffect(() => {
+    if (!fontsLoaded) {
+      loadFonts();
+    }
+  }, []);
+
+  const loadFonts = async () => {
+    await font.loadAsync({
+      "gilroy-f": require("../../assets/fonts/Gilroy-Medium.ttf"),
+    });
+    setFontsLoaded(true);
+  };
 
   return (
     <ScrollView showsVerticalScrollIndicator={false}>
@@ -96,6 +127,7 @@ function HomeScreen(props) {
               navigation.dispatch(DrawerActions.openDrawer());
             }}
           >
+            {/* //Icono de hamburguesa */}
             <Mobile name="menu" size={30} color="white" />
           </TouchableOpacity>
           <TouchableOpacity
@@ -113,7 +145,7 @@ function HomeScreen(props) {
             style={{
               marginTop: -150,
             }}
-            source={require("../../assets/logos/wave.png")}
+            source={require("../../assets/logos/fondo (2).png")}
           />
         </View>
         <View style={{ alignItems: "center" }}>
@@ -130,7 +162,9 @@ function HomeScreen(props) {
         </View>
 
         <View style={{ marginTop: -50 }}>
-          <Text style={styles.nameText}>{userData.nombre}</Text>
+          <Text style={styles.nameText}>
+            {nombre} {apellido}
+          </Text>
         </View>
 
         <View style={{ marginTop: 20, marginHorizontal: 25 }}>
@@ -142,9 +176,9 @@ function HomeScreen(props) {
                 <Email name="email" size={24} style={{ color: "white" }} />
               </View>
               <View style={styles.infoText}>
-                <Text style={styles.infoSmall_Text}>Email</Text>
+                <Text style={styles.infoSmall_Text}>Correo</Text>
                 <Text style={styles.infoLarge_Text} numberOfLines={1}>
-                  {userData.correo}
+                  {correo}
                 </Text>
               </View>
             </View>
@@ -155,21 +189,17 @@ function HomeScreen(props) {
               <View
                 style={[styles.infoIconCont, { backgroundColor: "#0d7313" }]}
               >
-                <Gender
-                  name="torsos-male-female"
-                  size={28}
-                  color="blue"
-                  style={{ color: "white" }}
+                <FontAwesome
+                  name="id-card-o"
+                  color="#fff"
+                  style={styles.smallIcon}
                 />
               </View>
+
               <View style={styles.infoText}>
-                <Text style={styles.infoSmall_Text}>Gender</Text>
+                <Text style={styles.infoSmall_Text}>DNI</Text>
                 <Text style={styles.infoLarge_Text}>
-                  {userData.gender == "" ||
-                  userData.gender == undefined ||
-                  userData.gender == null
-                    ? ""
-                    : userData.gender}
+                  {dni == "" || dni == undefined || dni == null ? "" : dni}
                 </Text>
               </View>
             </View>
@@ -180,20 +210,20 @@ function HomeScreen(props) {
               <View
                 style={[styles.infoIconCont, { backgroundColor: "#774BBC" }]}
               >
-                <Profession
-                  name="profile"
-                  size={24}
-                  style={{ color: "white" }}
+                <FontAwesome
+                  name="vcard"
+                  color="#fff"
+                  style={styles.smallIcon}
                 />
               </View>
               <View style={styles.infoText}>
-                <Text style={styles.infoSmall_Text}>Profession</Text>
+                <Text style={styles.infoSmall_Text}>#Empleado</Text>
                 <Text style={styles.infoLarge_Text}>
-                  {userData.profession == "" ||
-                  userData.profession == undefined ||
-                  userData.profession == null
+                  {numero_empleado == "" ||
+                  numero_empleado == undefined ||
+                  numero_empleado == null
                     ? ""
-                    : userData.profession}
+                    : numero_empleado}
                 </Text>
               </View>
             </View>
@@ -207,8 +237,8 @@ function HomeScreen(props) {
                 <Mobile name="mobile" size={24} style={{ color: "white" }} />
               </View>
               <View style={styles.infoText}>
-                <Text style={styles.infoSmall_Text}>Mobile</Text>
-                <Text style={styles.infoLarge_Text}>{userData.mobile}</Text>
+                <Text style={styles.infoSmall_Text}>Telefono</Text>
+                <Text style={styles.infoLarge_Text}>{telefono}</Text>
               </View>
             </View>
           </View>
@@ -252,7 +282,7 @@ const styles = StyleSheet.create({
     fontSize: 28,
 
     fontStyle: "normal",
-    fontFamily: "Open Sans",
+    fontFamily: "gilroy-f",
     fontWeight: "bold",
     textAlign: "center",
   },
