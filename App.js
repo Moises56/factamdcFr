@@ -27,9 +27,11 @@ import UserScreen from "./src/screens/Auth/UserScreen";
 import ProfileScreen from "./src/screens/Auth/ProfileScreen";
 import FacturaScreens from "./src/screens/Facturas/FacturaScreens";
 import LocalScreens from "./src/screens/Market/LocalScreens";
+import LocalDetailScreen from "./src/screens/Market/LocalDetailScreen";
 import LoginScreen from "./src/screens/Auth/LoginScreen";
 import RegisterPage from "./src/screens/Auth/RegisterScreen";
 import PrintBleScreens from "./src/screens/PrintBle/PrintBleScreens";
+import { BluetoothProvider } from "./src/screens/PrintBle/BluetoothContext";
 
 // Drawer Content
 import DrawerContent from "./DrawerContent";
@@ -115,6 +117,13 @@ const StackNav = () => {
       <Stack.Screen
         name="Local"
         component={LocalScreens}
+        options={{
+          headerShown: true,
+        }}
+      />
+      <Stack.Screen
+        name="LocalDetail"
+        component={LocalDetailScreen}
         options={{
           headerShown: true,
         }}
@@ -250,15 +259,17 @@ export default function App() {
   };
 
   return (
-    <NavigationContainer>
-      {isLoggedIn && userType === "admin" ? (
-        <AdminStack />
-      ) : isLoggedIn ? (
-        <DraweNav />
-      ) : (
-        <LoginNav />
-      )}
-      <Toast config={toastConfig} />
-    </NavigationContainer>
+    <BluetoothProvider>
+      <NavigationContainer>
+        {isLoggedIn && userType === "admin" ? (
+          <AdminStack />
+        ) : isLoggedIn ? (
+          <DraweNav />
+        ) : (
+          <LoginNav />
+        )}
+        <Toast config={toastConfig} />
+      </NavigationContainer>
+    </BluetoothProvider>
   );
 }

@@ -17,9 +17,11 @@ import { loginUser } from "../../services/AuthService";
 // import { ScrollView } from "react-native-gesture-handler";
 
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { useBluetooth } from "../../screens/PrintBle/BluetoothContext";
 
 function LoginScreen({ props }) {
   const navigation = useNavigation();
+  const { printInvoice, loggedInUser, setLoggedInUser } = useBluetooth();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
@@ -32,13 +34,21 @@ function LoginScreen({ props }) {
 
     loginUser(data)
       .then((res) => {
-        // console.log("Login: ", res.rol);
+        console.log("Login: ", res.user);
         if (res.status === "ok") {
           Alert.alert(res.message);
           AsyncStorage.setItem("token", res.data);
           AsyncStorage.setItem("isLoggedIn", JSON.stringify(true));
           // navigation.navigate("Home");
           AsyncStorage.setItem("userType", res.rol);
+          //guardar el usuario logueado
+          // Establecer el usuario logueado en el contexto Bluetooth
+          setLoggedInUser(res.user);
+          // Pasar el usuario logueado a la función printInvoice
+          printInvoice({
+            usuario: res.user, // Agregar el usuario logueado
+          });
+
           if (res.rol === "admin") {
             navigation.navigate("Home");
           } else {
