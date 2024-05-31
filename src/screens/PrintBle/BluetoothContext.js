@@ -18,9 +18,11 @@ export const BluetoothProvider = ({ children }) => {
   const [scanning, setScanning] = useState(false);
   const [loggedInUser, setLoggedInUser] = useState(null); // Estado para el usuario logueado
   const [invoiceCount, setInvoiceCount] = useState(0); // Contador de facturas por mes
+  const [user, setUser] = useState("");
 
   useEffect(() => {
     requestPermissions();
+    getUserInfo();
     // Obtener el contador de facturas para el mes actual al cargar el contexto
     const currentDate = new Date();
     const year = currentDate.getFullYear();
@@ -32,6 +34,11 @@ export const BluetoothProvider = ({ children }) => {
       setInvoiceCount(parseInt(lastInvoiceCount));
     }
   }, []);
+
+  const getUserInfo = async () => {
+    const loggedInUser = await AsyncStorage.getItem("loggedInUser");
+    setUser(loggedInUser);
+  };
 
   const requestPermissions = async () => {
     try {
@@ -55,23 +62,30 @@ export const BluetoothProvider = ({ children }) => {
     }
   };
 
-  const startScan = () => {
+  const showBluetoothAlert = () => {
+    Alert.alert(
+      "Bluetooth",
+      "Por favor, habilite el Bluetooth para escanear dispositivos.",
+      [{ text: "OK" }]
+    );
+  };
+
+  const startScan = async () => {
     if (!scanning) {
       setDevices([]);
       setScanning(true);
-      BluetoothManager.scanDevices().then(
-        (s) => {
-          const foundDevices = JSON.parse(s);
-          const paired = foundDevices.paired;
-          const found = foundDevices.found;
-          setDevices([...paired, ...found]);
-          setScanning(false);
-        },
-        (err) => {
-          console.error(err);
-          setScanning(false);
-        }
-      );
+      try {
+        const scanResult = await BluetoothManager.scanDevices();
+        const foundDevices = JSON.parse(scanResult);
+        const paired = foundDevices.paired;
+        const found = foundDevices.found;
+        setDevices([...paired, ...found]);
+      } catch (error) {
+        setScanning(false);
+        throw new Error("NOT_STARTED");
+      } finally {
+        setScanning(false);
+      }
     }
   };
 
@@ -85,6 +99,14 @@ export const BluetoothProvider = ({ children }) => {
         console.error(err);
       }
     );
+  };
+
+  const isBluetoothConnected = () => {
+    return connectedDevice !== null;
+  };
+
+  const requestBluetoothPermission = async () => {
+    await requestPermissions();
   };
 
   const printInvoice = async (invoiceDetails) => {
@@ -120,7 +142,7 @@ export const BluetoothProvider = ({ children }) => {
       await BluetoothEscposPrinter.printText(`Factura: ${invoiceNumber}\n`, {});
 
       // usuario logueado
-      await BluetoothEscposPrinter.printText(`Usuario: ${loggedInUser}\n`, {});
+      await BluetoothEscposPrinter.printText(`Usuario: ${user}\n`, {});
 
       await BluetoothEscposPrinter.printText(
         `Factura del mes: ${invoiceDetails.mes}\n`,
@@ -141,7 +163,7 @@ export const BluetoothProvider = ({ children }) => {
       );
 
       await BluetoothEscposPrinter.printText(
-        `Local: ${invoiceDetails.local}\n`,
+        `numero_local: ${invoiceDetails.numero_local}\n`,
         {}
       );
       await BluetoothEscposPrinter.printText(
@@ -150,7 +172,7 @@ export const BluetoothProvider = ({ children }) => {
       );
       await BluetoothEscposPrinter.printText("\r\n", {});
       await BluetoothEscposPrinter.printText(
-        `Monto: ${invoiceDetails.monto}\n`,
+        `Monto a pagar: ${invoiceDetails.monto}\n`,
         {}
       );
       await BluetoothEscposPrinter.printText("\r\n", {});
@@ -170,6 +192,8 @@ export const BluetoothProvider = ({ children }) => {
         printInvoice,
         loggedInUser,
         setLoggedInUser,
+        isBluetoothConnected,
+        requestBluetoothPermission,
       }}
     >
       {children}

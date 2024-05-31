@@ -1,8 +1,9 @@
-const API = "http://172.21.2.100:3001/auth";
-// const API = "http://192.168.0.10:3001/auth";
-/**
- * Create a new task
- */
+const API = "http://192.168.1.55:3001/auth";
+const APIEmail = "http://192.168.1.55:3001/Email";
+// const API = "https://backendfactamdc.onrender.com/auth";
+// const APIEmail = "https://backendfactamdc.onrender.com/Email";
+
+// Create a new task
 export const createTask = async (newTask) => {
   const res = await fetch(API + "/tasks", {
     method: "POST",
@@ -67,6 +68,30 @@ export const signOut = async (token) => {
     headers: {
       "x-access-token": token,
     },
+  });
+  return await res.json();
+};
+
+// Request password reset
+export const requestPasswordReset = async (correo) => {
+  const res = await fetch(`${APIEmail}/forgotPassword`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ correo }),
+  });
+  return await res.json();
+};
+
+// Reset password
+export const resetPassword = async (token, newPassword) => {
+  const res = await fetch(`${APIEmail}/resetPassword/${token}`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ newPassword }),
   });
   return await res.json();
 };

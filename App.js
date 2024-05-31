@@ -31,6 +31,8 @@ import LocalDetailScreen from "./src/screens/Market/LocalDetailScreen";
 import LoginScreen from "./src/screens/Auth/LoginScreen";
 import RegisterPage from "./src/screens/Auth/RegisterScreen";
 import PrintBleScreens from "./src/screens/PrintBle/PrintBleScreens";
+import ForgotPasswordScreen from "./src/screens/Auth/ForgotPasswordScreen";
+
 import { BluetoothProvider } from "./src/screens/PrintBle/BluetoothContext";
 
 // Drawer Content
@@ -157,7 +159,7 @@ const StackNav = () => {
         }}
       />
       <Stack.Screen
-        name="PrinBle"
+        name="Configuracion"
         component={PrintBleScreens}
         options={{
           headerShown: true,
@@ -194,6 +196,7 @@ const LoginNav = () => {
       <Stack.Screen name="Register" component={RegisterPage} />
       <Stack.Screen name="Home" component={DraweNav} />
       <Stack.Screen name="AdminScreen" component={AdminStack} />
+      <Stack.Screen name="ForgotPassword" component={ForgotPasswordScreen} />
     </Stack.Navigator>
   );
 };

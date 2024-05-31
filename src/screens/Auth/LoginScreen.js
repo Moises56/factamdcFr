@@ -1,4 +1,5 @@
-const {
+import React, { useState, useEffect } from "react";
+import {
   View,
   Text,
   Image,
@@ -6,47 +7,111 @@ const {
   TouchableOpacity,
   Alert,
   ScrollView,
-} = require("react-native");
+  StyleSheet,
+  Dimensions,
+  ActivityIndicator,
+} from "react-native";
 import { useNavigation } from "@react-navigation/native";
-import styles from "./style";
-import Feather from "react-native-vector-icons/Feather";
 import FontAwesome from "react-native-vector-icons/FontAwesome";
-import React, { useState } from "react";
-import { log } from "react-native-reanimated";
-import { loginUser } from "../../services/AuthService";
-// import { ScrollView } from "react-native-gesture-handler";
-
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { loginUser, getUserByToken } from "../../services/AuthService";
 import { useBluetooth } from "../../screens/PrintBle/BluetoothContext";
 
-function LoginScreen({ props }) {
+const { width, height } = Dimensions.get("window");
+
+function LoginScreen() {
   const navigation = useNavigation();
-  const { printInvoice, loggedInUser, setLoggedInUser } = useBluetooth();
+  const { printInvoice, setLoggedInUser } = useBluetooth();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [emailError, setEmailError] = useState(false);
+  const [passwordError, setPasswordError] = useState(false);
+  const [loading, setLoading] = useState(false); // Estado para el spinner
+
+  useEffect(() => {
+    // Verificar si hay un token almacenado localmente
+    const checkAuthToken = async () => {
+      try {
+        const token = await AsyncStorage.getItem("token");
+        if (token) {
+          // Si hay un token, intentar verificar su validez
+          const response = await getUserByToken(token);
+          if (response.status === "ok") {
+            // Si la verificación es exitosa, redirigir al usuario a la pantalla correspondiente
+            const userType = await AsyncStorage.getItem("userType");
+            if (userType === "admin") {
+              navigation.navigate("Home");
+            } else {
+              navigation.navigate("Market");
+            }
+          } else {
+            // Si la verificación falla, mostrar una alerta y limpiar los datos de autenticación almacenados
+            Alert.alert(
+              "Token expired",
+              "Your session has expired. Please log in again."
+            );
+            await AsyncStorage.removeItem("token");
+            await AsyncStorage.removeItem("isLoggedIn");
+            await AsyncStorage.removeItem("userType");
+            await AsyncStorage.removeItem("loggedInUser");
+            await AsyncStorage.removeItem("loggedInEmail");
+          }
+        }
+      } catch (error) {
+        console.error("Error checking auth token:", error);
+      }
+    };
+
+    checkAuthToken();
+  }, []);
+
+  const validateEmail = (email) => {
+    const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return re.test(String(email).toLowerCase());
+  };
 
   const handleSubmit = () => {
+    let valid = true;
+    if (!email || !validateEmail(email)) {
+      setEmailError(true);
+      valid = false;
+    } else {
+      setEmailError(false);
+    }
+
+    if (!password) {
+      setPasswordError(true);
+      valid = false;
+    } else {
+      setPasswordError(false);
+    }
+
+    if (!valid) {
+      return;
+    }
+
+    setLoading(true); // Mostrar el spinner
+
     const data = {
       correo: email,
       contrasena: password,
     };
-    // console.log("Data: ", data);
 
     loginUser(data)
       .then((res) => {
-        console.log("Login: ", res.user);
+        setLoading(false); // Ocultar el spinner
+
         if (res.status === "ok") {
           Alert.alert(res.message);
           AsyncStorage.setItem("token", res.data);
           AsyncStorage.setItem("isLoggedIn", JSON.stringify(true));
-          // navigation.navigate("Home");
           AsyncStorage.setItem("userType", res.rol);
-          //guardar el usuario logueado
-          // Establecer el usuario logueado en el contexto Bluetooth
+          AsyncStorage.setItem("loggedInUser", res.user);
+          AsyncStorage.setItem("loggedInEmail", email);
+
           setLoggedInUser(res.user);
-          // Pasar el usuario logueado a la función printInvoice
           printInvoice({
-            usuario: res.user, // Agregar el usuario logueado
+            usuario: res.user,
           });
 
           if (res.rol === "admin") {
@@ -54,163 +119,175 @@ function LoginScreen({ props }) {
           } else {
             navigation.navigate("Market");
           }
+        } else {
+          if (res.message.includes("Correo no válido")) {
+            setEmailError(true);
+          } else if (res.message.includes("Contraseña incorrecta")) {
+            setPasswordError(true);
+          }
+          Alert.alert("Error", res.message);
         }
       })
       .catch((error) => {
-        console.log(error);
+        console.error("Login error:", error);
+        setLoading(false); // Ocultar el spinner en caso de error
+        Alert.alert("Error", "Ocurrió un error al intentar iniciar sesión.");
       });
   };
 
   return (
     <ScrollView
-      contentContainerStyle={{
-        flexGrow: 1,
-      }}
+      contentContainerStyle={styles.container}
       keyboardShouldPersistTaps={"always"}
     >
-      <View style={{ backgroundColor: "white" }}>
-        <View style={styles.logoContainer}>
-          <Image
-            style={styles.logo}
-            source={require("../../../assets/logos/Logo_Belleza.png")}
+      <View style={styles.logoContainer}>
+        <Image
+          style={styles.logo}
+          source={require("../../../assets/logos/Logo_Belleza.png")}
+        />
+      </View>
+
+      <View style={styles.loginContainer}>
+        <Text style={styles.text_header}>AMDC</Text>
+        <View style={[styles.action, emailError ? styles.inputError : null]}>
+          <FontAwesome name="user-o" color="#5ccedf" style={styles.smallIcon} />
+          <TextInput
+            placeholder="Correo"
+            style={styles.textInput}
+            onChange={(e) => {
+              setEmail(e.nativeEvent.text);
+              setEmailError(false);
+            }}
           />
         </View>
-
-        <View style={styles.loginContainer}>
-          <Text style={styles.text_header}>AMDC</Text>
-          <View style={styles.action}>
-            <FontAwesome
-              name="user-o"
-              color="#5ccedf"
-              style={styles.smallIcon}
-            />
-            <TextInput
-              placeholder="Correo"
-              style={styles.textInput}
-              onChange={(e) => {
-                setEmail(e.nativeEvent.text);
-              }}
-            />
-          </View>
-          <View style={styles.action}>
-            <FontAwesome name="lock" color="#5ccedf" style={styles.smallIcon} />
-            <TextInput
-              placeholder="Contraseña"
-              style={styles.textInput}
-              onChange={(e) => {
-                setPassword(e.nativeEvent.text);
-              }}
-            />
-          </View>
-
-          <View
-            style={{
-              justifyContent: "flex-end",
-              alignItems: "flex-end",
-              marginTop: 8,
-              marginRight: 10,
+        {emailError && (
+          <Text style={styles.errorMessage}>Correo no válido</Text>
+        )}
+        <View style={[styles.action, passwordError ? styles.inputError : null]}>
+          <FontAwesome name="lock" color="#5ccedf" style={styles.smallIcon} />
+          <TextInput
+            placeholder="Contraseña"
+            style={styles.textInput}
+            secureTextEntry
+            onChange={(e) => {
+              setPassword(e.nativeEvent.text);
+              setPasswordError(false);
             }}
-          >
-            <Text style={{ color: "#5ccedf", fontWeight: "700" }}>
-              Olvidé mi contraseña
-            </Text>
-          </View>
+          />
         </View>
+        {passwordError && (
+          <Text style={styles.errorMessage}>Contraseña requerida</Text>
+        )}
 
-        <View style={styles.button}>
+        <View style={styles.forgotPasswordContainer}>
           <TouchableOpacity
-            style={styles.inBut}
             onPress={() => {
-              handleSubmit();
+              navigation.navigate("ForgotPassword");
             }}
           >
-            <View>
-              <Text style={styles.textSign}>Iniciar Session</Text>
-            </View>
+            <Text style={styles.forgotPasswordText}>Olvidé mi contraseña</Text>
           </TouchableOpacity>
-          <View style={{ padding: 15 }}>
-            <Text
-              style={{ fontSize: 14, fontWeight: "bold", color: "#919191" }}
-            ></Text>
-          </View>
-
-          <View style={styles.bottomButton}>
-            {/* <View
-            style={{
-              alignItems: "center",
-              justifyContent: "center",
-            }}
-          >
-            <TouchableOpacity style={styles.inBut2}>
-              <FontAwesome
-                name="user-circle-o"
-                color="white"
-                style={styles.smallIcon2}
-              />
-            </TouchableOpacity>
-            <Text style={styles.bottomText}>Guest</Text>
-          </View> */}
-            <View
-              style={{
-                alignItems: "center",
-                justifyContent: "center",
-              }}
-            >
-              <TouchableOpacity
-                style={styles.inBut2}
-                onPress={() => {
-                  navigation.navigate("Register");
-                }}
-              >
-                <FontAwesome
-                  name="user-plus"
-                  color="white"
-                  style={[styles.smallIcon2, { fontSize: 30 }]}
-                />
-              </TouchableOpacity>
-              <Text style={styles.bottomText}>Registrate</Text>
-            </View>
-            {/* <View
-            style={{
-              alignItems: "center",
-              justifyContent: "center",
-            }}
-          >
-            <TouchableOpacity
-              style={styles.inBut2}
-              onPress={() => alert("Coming Soon")}
-            >
-              <FontAwesome
-                name="google"
-                color="white"
-                style={[styles.smallIcon2, { fontSize: 30 }]}
-              />
-            </TouchableOpacity>
-            <Text style={styles.bottomText}>Google</Text>
-          </View> */}
-            {/* <View
-            style={{
-              alignItems: "center",
-              justifyContent: "center",
-            }}
-          >
-            <TouchableOpacity
-              style={styles.inBut2}
-              onPress={() => alert("Coming Soon")}
-            >
-              <FontAwesome
-                name="facebook-f"
-                color="white"
-                style={[styles.smallIcon2, { fontSize: 30 }]}
-              />
-            </TouchableOpacity>
-            <Text style={styles.bottomText}>Facebook</Text>
-          </View> */}
-          </View>
         </View>
+      </View>
+
+      <View style={styles.buttonContainer}>
+        <TouchableOpacity
+          style={styles.inBut}
+          onPress={handleSubmit}
+          disabled={loading} // Deshabilitar el botón mientras se muestra el spinner
+        >
+          {loading ? (
+            <ActivityIndicator size="small" color="#ffffff" />
+          ) : (
+            <Text style={styles.textSign}>Iniciar Sesión</Text>
+          )}
+        </TouchableOpacity>
       </View>
     </ScrollView>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    flexGrow: 1,
+    backgroundColor: "white",
+    alignItems: "center",
+    justifyContent: "center",
+    height: height,
+    paddingHorizontal: 20,
+  },
+  logoContainer: {
+    marginBottom: 30,
+  },
+  logo: {
+    width: 220,
+    height: 220,
+  },
+  loginContainer: {
+    width: "100%",
+  },
+  text_header: {
+    fontSize: 24,
+    fontWeight: "bold",
+    color: "#5ccedf",
+    textAlign: "center",
+    marginBottom: 20,
+  },
+  action: {
+    flexDirection: "row",
+    marginTop: 10,
+    borderBottomWidth: 1,
+    borderBottomColor: "#f2f2f2",
+    paddingBottom: 5,
+    alignItems: "center",
+    borderRadius: 10, // Bordes redondeados
+    borderWidth: 1, // Ancho del borde
+    borderColor: "#5ccedf", // Color del borde
+    padding: 10, // Relleno para que el borde no se superponga con el contenido
+  },
+  inputError: {
+    borderColor: "red",
+  },
+  smallIcon: {
+    marginRight: 10,
+  },
+  textInput: {
+    flex: 1,
+    color: "#05375a",
+    height: 40,
+  },
+  errorMessage: {
+    color: "red",
+    marginTop: 5,
+  },
+  forgotPasswordContainer: {
+    justifyContent: "flex-end",
+    alignItems: "flex-end",
+    marginTop: 8,
+    marginRight: 10,
+  },
+  forgotPasswordText: {
+    color: "#5ccedf",
+    fontWeight: "700",
+  },
+  buttonContainer: {
+    marginTop: 20,
+    width: "100%",
+    alignItems: "center",
+  },
+  inBut: {
+    width: "100%",
+    height: 50,
+    justifyContent: "center",
+    alignItems: "center",
+    borderRadius: 10,
+    backgroundColor: "#5ccedf",
+  },
+  textSign: {
+    fontSize: 18,
+    fontWeight: "bold",
+    color: "white",
+  },
+});
 
 export default LoginScreen;

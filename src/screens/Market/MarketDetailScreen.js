@@ -20,7 +20,7 @@ function MarketDetailScreen({ navigation }) {
       const response = await getMarkets();
       const marketsData = response.data; // Accede al array de mercados
       setMarkets(marketsData);
-      console.log("Markets: ", marketsData);
+      // console.log("Markets: ", marketsData);
     } catch (error) {
       console.error("Error fetching markets: ", error);
     }

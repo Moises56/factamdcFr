@@ -13,6 +13,13 @@ buildscript {
     repositories {
         google()
         mavenCentral()
+        jcenter { // Agregar jcenter con HTTPS
+            url "https://jcenter.bintray.com/"
+        }
+        // jcenter { // Opción temporal, si HTTPS no es posible
+        //     url "http://jcenter.bintray.com/"
+        //     allowInsecureProtocol = true
+        // }
     }
     dependencies {
         classpath('com.android.tools.build:gradle')

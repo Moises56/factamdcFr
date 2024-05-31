@@ -7,7 +7,7 @@ const InicioScreen = ({ navigation }) => {
     <View>
       {/* crear enlaces para ir a login, mostrar una imagen  */}
       <Image
-        source={{ uri: "https://via.placeholder.com/800" }}
+        source={{ uri: "https://laguitos.s3.amazonaws.com/LOGOWEB.png" }}
         style={styles.headerImage}
       />
       <Text style={styles.title}>Factura AMDC</Text>

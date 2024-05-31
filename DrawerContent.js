@@ -1,5 +1,5 @@
-import React from "react";
-import { View, StyleSheet, Text } from "react-native";
+import React, { useState, useEffect } from "react";
+import { View, StyleSheet, Text, Image } from "react-native";
 import { DrawerContentScrollView, DrawerItem } from "@react-navigation/drawer";
 import { Avatar, Title } from "react-native-paper";
 import { TouchableOpacity } from "react-native-gesture-handler";
@@ -11,15 +11,18 @@ const DrawerList = [
   { icon: "home-outline", label: "Inicio", navigateTo: "Inicio" },
   { icon: "chart-line", label: "Dashboard", navigateTo: "Dashboard" },
   { icon: "store", label: "Mercados", navigateTo: "Market" },
-  { icon: "storefront", label: "Locales", navigateTo: "Local" },
   { icon: "account-multiple", label: "Perfil", navigateTo: "Profile" },
   { icon: "account-group", label: "Usuarios", navigateTo: "User" },
   { icon: "file-document-edit", label: "Facturas", navigateTo: "Factura" },
-  { icon: "file-document-edit", label: "PrinBle", navigateTo: "PrinBle" },
+  {
+    icon: "file-document-edit",
+    label: "Configuración",
+    navigateTo: "Configuracion",
+  },
 ];
+
 const DrawerLayout = ({ icon, label, navigateTo }) => {
   const navigation = useNavigation();
-  // console.log(userData);
   return (
     <DrawerItem
       icon={({ color, size }) => <Icon name={icon} color={color} size={size} />}
@@ -43,13 +46,34 @@ const DrawerItems = (props) => {
     );
   });
 };
+
 function DrawerContent(props) {
   const navigation = useNavigation();
-  function signOut() {
-    AsyncStorage.setItem("isLoggedIn", "");
-    AsyncStorage.setItem("token", "");
+  const [user, setUser] = useState("");
+  const [email, setEmail] = useState("");
+  const [role, setRole] = useState("");
+
+  useEffect(() => {
+    getUserInfo();
+  }, []);
+
+  const getUserInfo = async () => {
+    const loggedInUser = await AsyncStorage.getItem("loggedInUser");
+    setUser(loggedInUser);
+
+    const loggedInEmail = await AsyncStorage.getItem("loggedInEmail");
+    setEmail(loggedInEmail);
+
+    const loggedInRole = await AsyncStorage.getItem("userType");
+    setRole(loggedInRole);
+  };
+
+  const signOut = async () => {
+    await AsyncStorage.removeItem("isLoggedIn");
+    await AsyncStorage.removeItem("token");
     navigation.navigate("LoginScreen");
-  }
+  };
+
   return (
     <View style={{ flex: 1 }}>
       <DrawerContentScrollView {...props}>
@@ -65,9 +89,12 @@ function DrawerContent(props) {
                   style={{ marginTop: 5 }}
                 />
                 <View style={{ marginLeft: 10, flexDirection: "column" }}>
-                  <Title style={styles.title}>Adarsh</Title>
+                  <Title style={styles.title}>{user}</Title>
                   <Text style={styles.caption} numberOfLines={1}>
-                    adarshthakur210@gmail.com
+                    {email}
+                  </Text>
+                  <Text style={styles.caption} numberOfLines={1}>
+                    {role}
                   </Text>
                 </View>
               </View>
@@ -80,7 +107,7 @@ function DrawerContent(props) {
       </DrawerContentScrollView>
       <View style={styles.bottomDrawerSection}>
         <DrawerItem
-          onPress={() => signOut()}
+          onPress={signOut}
           icon={({ color, size }) => (
             <Icon name="exit-to-app" color={color} size={size} />
           )}
@@ -90,7 +117,6 @@ function DrawerContent(props) {
     </View>
   );
 }
-export default DrawerContent;
 
 const styles = StyleSheet.create({
   drawerContent: {
@@ -107,22 +133,7 @@ const styles = StyleSheet.create({
   caption: {
     fontSize: 13,
     lineHeight: 14,
-    // color: '#6e6e6e',
     width: "100%",
-  },
-  row: {
-    marginTop: 20,
-    flexDirection: "row",
-    alignItems: "center",
-  },
-  section: {
-    flexDirection: "row",
-    alignItems: "center",
-    // marginRight: 15,
-  },
-  paragraph: {
-    fontWeight: "bold",
-    marginRight: 3,
   },
   drawerSection: {
     marginTop: 15,
@@ -137,10 +148,6 @@ const styles = StyleSheet.create({
     borderBottomColor: "#dedede",
     borderBottomWidth: 1,
   },
-  preference: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    paddingVertical: 12,
-    paddingHorizontal: 16,
-  },
 });
+
+export default DrawerContent;

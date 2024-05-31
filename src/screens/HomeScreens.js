@@ -13,10 +13,6 @@ import React from "react";
 import * as font from "expo-font";
 import { Avatar } from "react-native-paper";
 import Icon from "react-native-vector-icons/FontAwesome5";
-import Check from "react-native-vector-icons/Feather";
-import Back from "react-native-vector-icons/Ionicons";
-import Gender from "react-native-vector-icons/Foundation";
-import Feather from "react-native-vector-icons/Feather";
 import FontAwesome from "react-native-vector-icons/FontAwesome";
 
 import Mobile from "react-native-vector-icons/Entypo";

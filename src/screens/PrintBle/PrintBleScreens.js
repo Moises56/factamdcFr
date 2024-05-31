@@ -7,6 +7,7 @@ import {
   TouchableOpacity,
   ActivityIndicator,
   StyleSheet,
+  Alert,
 } from "react-native";
 import { useBluetooth } from "./BluetoothContext";
 
@@ -14,9 +15,33 @@ const PrintBleScreens = () => {
   const { devices, connectedDevice, scanning, startScan, connectDevice } =
     useBluetooth();
 
+  const handleStartScan = async () => {
+    try {
+      await startScan();
+    } catch (error) {
+      if (error.message === "NOT_STARTED") {
+        showBluetoothAlert();
+      } else {
+        console.error(error);
+      }
+    }
+  };
+
+  const showBluetoothAlert = () => {
+    Alert.alert(
+      "Configuracion del Bluetooth",
+      "Por favor, habilite el Bluetooth para escanear el dispositivo.",
+      [{ text: "OK" }]
+    );
+  };
+
   return (
     <View style={styles.container}>
-      <Button title="Scanear Dispositivos" onPress={startScan} />
+      <Button
+        title="Escanear Dispositivos"
+        onPress={handleStartScan}
+        color="#5ccedf"
+      />
       {scanning && (
         <ActivityIndicator
           size="large"
@@ -42,7 +67,7 @@ const PrintBleScreens = () => {
           </TouchableOpacity>
         )}
       />
-      <Text>
+      <Text style={styles.conect}>
         {connectedDevice
           ? `Conectado a: ${connectedDevice.name}`
           : "No hay dispositivo conectado"}
@@ -59,6 +84,12 @@ const styles = StyleSheet.create({
   },
   spinner: {
     marginVertical: 20,
+  },
+  conect: {
+    marginTop: 20,
+    fontSize: 18,
+    fontWeight: "bold",
+    color: "#333",
   },
 });
 

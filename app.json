@@ -11,18 +11,20 @@
       "resizeMode": "contain",
       "backgroundColor": "#ffffff"
     },
-    "assetBundlePatterns": [
-      "**/*"
-    ],
+    "assetBundlePatterns": ["**/*"],
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "runtimeVersion": {
+        "policy": "appVersion"
+      }
     },
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
       },
-      "package": "com.mougrind.factamdcfr"
+      "package": "com.mougrind.factamdcfr",
+      "runtimeVersion": "1.0.0"
     },
     "web": {
       "favicon": "./assets/favicon.png"
@@ -31,6 +33,9 @@
       "eas": {
         "projectId": "c7bd7d3a-639b-4d11-b8cc-66947f893c25"
       }
+    },
+    "updates": {
+      "url": "https://u.expo.dev/c7bd7d3a-639b-4d11-b8cc-66947f893c25"
     }
   }
 }
