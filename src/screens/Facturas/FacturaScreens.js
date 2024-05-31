@@ -123,7 +123,7 @@ function FacturaScreens() {
 
         <Card style={styles.card}>
           <Card.Cover
-            source={{ uri: "https://amdchn.s3.amazonaws.com/fondo-app.png" }}
+            source={{ uri: "https://amdchn.s3.amazonaws.com/fondo+(1).png" }}
           />
           <Card.Title
             title={`#: ${selectedFactura?.id}`}

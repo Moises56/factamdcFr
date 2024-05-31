@@ -14,7 +14,7 @@ const InicioScreen = ({ navigation }) => {
     <View>
       {/* crear enlaces para ir a login, mostrar una imagen  */}
       <Image
-        source={{ uri: "https://amdchn.s3.amazonaws.com/fondo-app.png" }}
+        source={{ uri: "https://amdchn.s3.amazonaws.com/fondo+(1).png" }}
         style={styles.headerImage}
       />
       <Text style={styles.title}>Factura AMDC</Text>
