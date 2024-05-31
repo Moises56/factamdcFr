@@ -10,6 +10,7 @@ import {
   Button,
 } from "react-native";
 import { getInvoices } from "../../services/FacturaService";
+import { Avatar, Card, IconButton } from "react-native-paper";
 
 function FacturaScreens() {
   const [facturas, setFacturas] = useState([]);
@@ -83,14 +84,27 @@ function FacturaScreens() {
           setModalVisible(true);
         }}
       >
-        <View style={styles.facturaItem}>
-          <Text>#: {item.id}</Text>
-          <Text>Mercado: {item.mercado}</Text>
-          <Text>Número Local: {item.numero_local}</Text>
-          <Text>Propietario: {item.propietario}</Text>
-          <Text>Fecha: {fechaFormateada}</Text>
-          <Text>Monto: {item.monto}</Text>
-        </View>
+        <Card style={styles.card}>
+          <Card.Title
+            title={`#: ${item.id}`}
+            subtitle={`Mercado: ${item.mercado}`}
+            left={(props) => (
+              <Avatar.Icon
+                {...props}
+                icon="file-document-edit"
+                size={35}
+                color="#fff"
+                style={styles.icon}
+              />
+            )} // Cambiado a icono de factura
+          />
+          <Card.Content>
+            <Text style={styles.title}>Número Local: {item.numero_local}</Text>
+            <Text style={styles.content}>Propietario: {item.propietario}</Text>
+            <Text style={styles.content}>Fecha: {fechaFormateada}</Text>
+            <Text style={styles.content}>Monto: {item.monto}</Text>
+          </Card.Content>
+        </Card>
       </TouchableOpacity>
     );
   };
@@ -105,25 +119,51 @@ function FacturaScreens() {
       }}
     >
       <View style={styles.modalContent}>
-        <Text>ID: {selectedFactura?.id}</Text>
-        <Text>Mercado: {selectedFactura?.mercado}</Text>
-        <Text>Propietario: {selectedFactura?.propietario}</Text>
-        <Text>DNI: {selectedFactura?.DNI}</Text>
-        <Text>Permiso de Operación: {selectedFactura?.permiso_operacion}</Text>
-        <Text>Fecha Factura: {selectedFactura?.fechaFactura}</Text>
-        <Text>Número de Local: {selectedFactura?.numero_local}</Text>
-        <Text>Concepto: {selectedFactura?.concepto}</Text>
-        <Text>Mes: {selectedFactura?.mes}</Text>
-        <Text>Monto a pagar: {selectedFactura?.monto}</Text>
-        <Text>Usuario: {selectedFactura?.usuario}</Text>
-        <Text>Fecha de Creación: {selectedFactura?.fecha_creacion}</Text>
-        {/* <Button title="Cerrar" onPress={() => setModalVisible(false)} /> */}
-        <TouchableOpacity
-          style={styles.button}
-          onPress={() => setModalVisible(false)}
-        >
-          <Text style={styles.buttonText}>Cerrar</Text>
-        </TouchableOpacity>
+        <Text style={styles.titleDetalle}>Detalle de Factura</Text>
+
+        <Card style={styles.card}>
+          <Card.Cover
+            source={{ uri: "https://amdchn.s3.amazonaws.com/fondo-app.png" }}
+          />
+          <Card.Title
+            title={`#: ${selectedFactura?.id}`}
+            subtitle={`Mercado: ${selectedFactura?.mercado}`}
+            left={(props) => (
+              <Avatar.Icon
+                {...props}
+                icon="file-document-edit"
+                size={35}
+                color="#fff"
+                style={styles.icon}
+              />
+            )}
+            right={(props) => (
+              <IconButton {...props} icon="dots-vertical" onPress={() => {}} />
+            )}
+          />
+          <Card.Content>
+            <Text>Propietario: {selectedFactura?.propietario}</Text>
+            <Text>DNI: {selectedFactura?.DNI}</Text>
+            <Text>
+              Permiso de Operación: {selectedFactura?.permiso_operacion}
+            </Text>
+            <Text>Fecha Factura: {selectedFactura?.fechaFactura}</Text>
+            <Text>Número de Local: {selectedFactura?.numero_local}</Text>
+            <Text>Concepto: {selectedFactura?.concepto}</Text>
+            <Text>Mes Pagado: {selectedFactura?.mes}</Text>
+            <Text>Monto Pagado: {selectedFactura?.monto}</Text>
+            <Text>Usuario: {selectedFactura?.usuario}</Text>
+            <Text>Fecha de Creación: {selectedFactura?.fecha_creacion}</Text>
+          </Card.Content>
+          <Card.Actions>
+            <TouchableOpacity
+              style={styles.button}
+              onPress={() => setModalVisible(false)}
+            >
+              <Text style={styles.buttonText}>Cerrar</Text>
+            </TouchableOpacity>
+          </Card.Actions>
+        </Card>
       </View>
     </Modal>
   );
@@ -131,7 +171,7 @@ function FacturaScreens() {
   return (
     <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
       {loading ? (
-        <ActivityIndicator size="large" color="#0000ff" />
+        <ActivityIndicator size="large" color="#5ccedf" />
       ) : facturas.length === 0 ? (
         <Text>No hay facturas disponibles</Text>
       ) : (
@@ -174,6 +214,28 @@ const styles = StyleSheet.create({
     color: "white",
     fontSize: 16,
     fontWeight: "bold",
+  },
+  card: {
+    marginVertical: 5,
+    width: "100%",
+  },
+  title: {
+    fontSize: 18,
+    fontWeight: "bold",
+    marginBottom: 5,
+  },
+  content: {
+    fontSize: 16,
+    marginBottom: 3,
+  },
+  icon: {
+    backgroundColor: "#5ccedf",
+  },
+  titleDetalle: {
+    fontSize: 30,
+    fontWeight: "bold",
+    marginBottom: 10,
+    color: "#5ccedf",
   },
 });
 

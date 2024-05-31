@@ -15,7 +15,7 @@ const DrawerList = [
   { icon: "account-group", label: "Usuarios", navigateTo: "User" },
   { icon: "file-document-edit", label: "Facturas", navigateTo: "Factura" },
   {
-    icon: "file-document-edit",
+    icon: "cog-outline",
     label: "Configuración",
     navigateTo: "Configuracion",
   },

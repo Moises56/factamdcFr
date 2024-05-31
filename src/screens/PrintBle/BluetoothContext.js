@@ -154,6 +154,10 @@ export const BluetoothProvider = ({ children }) => {
         {}
       );
       await BluetoothEscposPrinter.printText(
+        `numero_local: ${invoiceDetails.numero_local}\n`,
+        {}
+      );
+      await BluetoothEscposPrinter.printText(
         `Propietario: ${invoiceDetails.propietario}\n`,
         {}
       );
@@ -162,10 +166,6 @@ export const BluetoothProvider = ({ children }) => {
         {}
       );
 
-      await BluetoothEscposPrinter.printText(
-        `numero_local: ${invoiceDetails.numero_local}\n`,
-        {}
-      );
       await BluetoothEscposPrinter.printText(
         `Concepto: ${invoiceDetails.concepto}\n`,
         {}
